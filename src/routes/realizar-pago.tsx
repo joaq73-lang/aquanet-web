@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, X, AlertTriangle, Download, ChevronRight } from "lucide-react";
+import {
+  Check,
+  X,
+  AlertTriangle,
+  Download,
+  ChevronRight,
+  CreditCard,
+  Smartphone,
+} from "lucide-react";
 import AppShell from "@/components/AppShell";
+import PaymentGateway from "@/components/PaymentGateway";
 
 export const Route = createFileRoute("/realizar-pago")({
   head: () => ({
@@ -15,7 +24,7 @@ export const Route = createFileRoute("/realizar-pago")({
 
 type PaymentStep = "select" | "summary" | "result";
 type PaymentResult = "approved" | "rejected" | "cancelled";
-type PaymentMethod = "credit" | "pagoefectivo" | "internet";
+type MedioPagoTipo = "tarjeta" | "billetera";
 
 type Factura = {
   codigo_factura: number;
@@ -44,25 +53,24 @@ function RealizarPagoPage() {
   const [step, setStep] = useState<PaymentStep>("select");
   const [result, setResult] = useState<PaymentResult>("approved");
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit");
+  const [medioPagoTipo, setMedioPagoTipo] = useState<MedioPagoTipo | null>(null);
+  const [gatewayOpen, setGatewayOpen] = useState(false);
   const [operationNumber, setOperationNumber] = useState<string>("");
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [canales, setCanales] = useState<CanalPago[]>([]);
   const [mediosPago, setMediosPago] = useState<MedioPago[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCanal, setSelectedCanal] = useState<number | null>(null);
-  const [selectedMedioPago, setSelectedMedioPago] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = window.localStorage.getItem("aquanet-token");
-        
+
         const [facturasRes, canalesRes, mediosRes] = await Promise.all([
-          fetch("/api/facturas/list?estado=emitida,vencida,parcial", {
+          fetch("/api/facturas/list?estado=pendiente,vencida,en_disputa", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("/api/canales/list"),
+          fetch("/api/canales/list?tipo=portal_web"),
           fetch("/api/medios-pago/list"),
         ]);
 
@@ -89,6 +97,13 @@ function RealizarPagoPage() {
       .reduce((sum, f) => sum + f.saldo, 0);
   }, [selected, facturas]);
 
+  // El canal de pago no se muestra al usuario: para pagos hechos desde la app,
+  // siempre se registra bajo el canal "portal_web".
+  const canalPortalWeb = canales[0]?.codigo_canal ?? null;
+
+  const medioTarjeta = mediosPago.find((m) => m.nombre_medio_pago === "tarjeta_credito");
+  const medioBilletera = mediosPago.find((m) => m.nombre_medio_pago === "billetera_digital");
+
   const handleSelectReceipt = (id: number) => {
     const newSelected = new Set(selected);
     if (newSelected.has(id)) {
@@ -111,17 +126,33 @@ function RealizarPagoPage() {
     setStep("summary");
   };
 
-  const handleConfirmPayment = async () => {
-    if (!selectedCanal || !selectedMedioPago) {
-      alert("Por favor selecciona un canal y medio de pago");
+  const handleOpenGateway = () => {
+    if (!medioPagoTipo) {
+      alert("Por favor selecciona un medio de pago");
+      return;
+    }
+    setGatewayOpen(true);
+  };
+
+  const handlePaymentConfirmed = async () => {
+    setGatewayOpen(false);
+
+    const codigoMedioPago =
+      medioPagoTipo === "tarjeta"
+        ? medioTarjeta?.codigo_medio_pago
+        : medioBilletera?.codigo_medio_pago;
+
+    if (!codigoMedioPago || !canalPortalWeb) {
+      setResult("rejected");
+      setStep("result");
       return;
     }
 
     try {
       const token = window.localStorage.getItem("aquanet-token");
-      
+
       for (const facturaId of selected) {
-        const factura = facturas.find(f => f.codigo_factura === facturaId);
+        const factura = facturas.find((f) => f.codigo_factura === facturaId);
         if (!factura) continue;
 
         await fetch("/api/pagos/registrar", {
@@ -132,8 +163,8 @@ function RealizarPagoPage() {
           },
           body: JSON.stringify({
             codigo_factura: facturaId,
-            codigo_canal: selectedCanal,
-            codigo_medio_pago: selectedMedioPago,
+            codigo_canal: canalPortalWeb,
+            codigo_medio_pago: codigoMedioPago,
             monto_pagado: factura.saldo,
           }),
         });
@@ -156,7 +187,7 @@ function RealizarPagoPage() {
   const handleCancel = () => {
     setStep("select");
     setSelected(new Set());
-    setPaymentMethod("credit");
+    setMedioPagoTipo(null);
   };
 
   const handleBackToHome = () => {
@@ -168,14 +199,18 @@ function RealizarPagoPage() {
       <AppShell>
         <div className="p-4 sm:p-8">
           <div className="mb-8">
-            <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary-deep">Consultas y Pagos</p>
+            <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary-deep">
+              Consultas y Pagos
+            </p>
             <h1 className="mt-3 text-3xl font-semibold text-foreground">Mis recibos</h1>
           </div>
 
           <div className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-foreground">Recibos pendientes ({facturas.length})</h2>
+                <h2 className="text-lg font-semibold text-foreground">
+                  Recibos pendientes ({facturas.length})
+                </h2>
                 {facturas.length > 0 && (
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -184,14 +219,18 @@ function RealizarPagoPage() {
                       onChange={handleSelectAll}
                       className="w-4 h-4 rounded border-border"
                     />
-                    <span className="text-sm font-medium text-muted-foreground">Seleccionar todos</span>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      Seleccionar todos
+                    </span>
                   </label>
                 )}
               </div>
 
               {facturas.length === 0 ? (
                 <div className="py-12 text-center">
-                  <p className="text-muted-foreground">¡Felicidades! No tienes recibos pendientes.</p>
+                  <p className="text-muted-foreground">
+                    ¡Felicidades! No tienes recibos pendientes.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -221,7 +260,9 @@ function RealizarPagoPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground font-medium">Saldo</p>
-                          <p className="font-semibold text-primary-deep text-lg">S/. {factura.saldo.toFixed(2)}</p>
+                          <p className="font-semibold text-primary-deep text-lg">
+                            S/. {factura.saldo.toFixed(2)}
+                          </p>
                         </div>
                       </div>
                     </label>
@@ -234,7 +275,9 @@ function RealizarPagoPage() {
               <div className="rounded-2xl bg-primary/10 border border-primary/20 p-4 flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Monto total a pagar</p>
-                  <p className="text-2xl font-bold text-primary-deep">S/. {totalAmount.toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-primary-deep">
+                    S/. {totalAmount.toFixed(2)}
+                  </p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -253,7 +296,6 @@ function RealizarPagoPage() {
                 </div>
               </div>
             )}
-
           </div>
         </div>
       </AppShell>
@@ -265,18 +307,25 @@ function RealizarPagoPage() {
       <AppShell>
         <div className="p-4 sm:p-8">
           <div className="mb-6">
-            <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary-deep">Confirmación</p>
+            <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary-deep">
+              Confirmación
+            </p>
             <h1 className="mt-2 text-3xl font-semibold text-foreground">Resumen de pago</h1>
           </div>
 
           <div className="space-y-6">
             <div className="rounded-3xl border border-border bg-card p-6">
-              <h2 className="font-semibold text-foreground mb-4">Recibos a pagar ({selected.size})</h2>
+              <h2 className="font-semibold text-foreground mb-4">
+                Recibos a pagar ({selected.size})
+              </h2>
               <div className="space-y-2">
                 {facturas
                   .filter((f) => selected.has(f.codigo_factura))
                   .map((factura) => (
-                    <div key={factura.codigo_factura} className="flex items-center justify-between text-sm">
+                    <div
+                      key={factura.codigo_factura}
+                      className="flex items-center justify-between text-sm"
+                    >
                       <span>{factura.periodo}</span>
                       <span>S/. {factura.saldo.toFixed(2)}</span>
                     </div>
@@ -289,41 +338,33 @@ function RealizarPagoPage() {
             </div>
 
             <div className="rounded-3xl border border-border bg-card p-6">
-              <h2 className="font-semibold text-foreground mb-4">Canal de pago</h2>
               <div className="grid gap-3 sm:grid-cols-2">
-                {canales.map((canal) => (
-                  <button
-                    key={canal.codigo_canal}
-                    onClick={() => setSelectedCanal(canal.codigo_canal)}
-                    className={`rounded-2xl border-2 p-4 text-left transition ${
-                      selectedCanal === canal.codigo_canal
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-background hover:bg-secondary"
-                    }`}
-                  >
-                    <p className="font-semibold text-foreground text-sm">{canal.nombre_canal}</p>
-                    <p className="text-xs text-muted-foreground">{canal.modalidad_canal}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-border bg-card p-6">
-              <h2 className="font-semibold text-foreground mb-4">Medio de pago</h2>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {mediosPago.map((medio) => (
-                  <button
-                    key={medio.codigo_medio_pago}
-                    onClick={() => setSelectedMedioPago(medio.codigo_medio_pago)}
-                    className={`rounded-2xl border-2 p-4 text-left transition ${
-                      selectedMedioPago === medio.codigo_medio_pago
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-background hover:bg-secondary"
-                    }`}
-                  >
-                    <p className="font-semibold text-foreground text-sm">{medio.nombre_medio_pago}</p>
-                  </button>
-                ))}
+                <button
+                  onClick={() => setMedioPagoTipo("tarjeta")}
+                  className={`flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition ${
+                    medioPagoTipo === "tarjeta"
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-background hover:bg-secondary"
+                  }`}
+                >
+                  <CreditCard className="h-6 w-6 text-primary-deep shrink-0" />
+                  <span className="font-semibold text-foreground text-sm">
+                    Tarjeta de crédito / débito
+                  </span>
+                </button>
+                <button
+                  onClick={() => setMedioPagoTipo("billetera")}
+                  className={`flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition ${
+                    medioPagoTipo === "billetera"
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-background hover:bg-secondary"
+                  }`}
+                >
+                  <Smartphone className="h-6 w-6 text-primary-deep shrink-0" />
+                  <span className="font-semibold text-foreground text-sm">
+                    Billetera electrónica (Yape, Plin)
+                  </span>
+                </button>
               </div>
             </div>
 
@@ -335,7 +376,7 @@ function RealizarPagoPage() {
                 Cancelar
               </button>
               <button
-                onClick={handleConfirmPayment}
+                onClick={handleOpenGateway}
                 className="rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground hover:bg-primary-deep transition flex items-center gap-2"
               >
                 Confirmar y Pagar
@@ -344,6 +385,16 @@ function RealizarPagoPage() {
             </div>
           </div>
         </div>
+
+        {medioPagoTipo && (
+          <PaymentGateway
+            open={gatewayOpen}
+            medioPago={medioPagoTipo}
+            monto={totalAmount}
+            onOpenChange={setGatewayOpen}
+            onConfirm={handlePaymentConfirmed}
+          />
+        )}
       </AppShell>
     );
   }
@@ -358,8 +409,12 @@ function RealizarPagoPage() {
                 <Check className="h-12 w-12 text-emerald-600" />
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-foreground">¡Pago realizado con éxito!</h1>
-                <p className="mt-2 text-muted-foreground">Su pago ha sido procesado correctamente</p>
+                <h1 className="text-3xl font-semibold text-foreground">
+                  ¡Pago realizado con éxito!
+                </h1>
+                <p className="mt-2 text-muted-foreground">
+                  Su pago ha sido procesado correctamente
+                </p>
               </div>
 
               <div className="rounded-2xl bg-card border border-border p-4 text-left space-y-2">
@@ -378,11 +433,9 @@ function RealizarPagoPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Medio de pago:</span>
                   <span className="font-semibold">
-                    {paymentMethod === "credit"
-                      ? "Tarjeta"
-                      : paymentMethod === "pagoefectivo"
-                      ? "PagoEfectivo"
-                      : "Banca por Internet"}
+                    {medioPagoTipo === "tarjeta"
+                      ? "Tarjeta de crédito / débito"
+                      : "Billetera electrónica"}
                   </span>
                 </div>
               </div>
@@ -418,7 +471,8 @@ function RealizarPagoPage() {
               <div>
                 <h1 className="text-3xl font-semibold text-foreground">Pago rechazado</h1>
                 <p className="mt-2 text-muted-foreground">
-                  Su pago ha sido rechazado. Por favor, verifique los fondos de su tarjeta o intente con otro medio de pago.
+                  Su pago ha sido rechazado. Por favor, verifique los fondos de su tarjeta o intente
+                  con otro medio de pago.
                 </p>
               </div>
 
@@ -456,7 +510,9 @@ function RealizarPagoPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-semibold text-foreground">Pago cancelado</h1>
-                <p className="mt-2 text-muted-foreground">El proceso de pago ha sido cancelado. No se ha realizado ningún cargo.</p>
+                <p className="mt-2 text-muted-foreground">
+                  El proceso de pago ha sido cancelado. No se ha realizado ningún cargo.
+                </p>
               </div>
 
               <button

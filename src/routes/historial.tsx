@@ -2,7 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Info, FileText, Download, XCircle, Sparkles } from "lucide-react";
 import AppShell from "@/components/AppShell";
-import { Drawer, DrawerContent, DrawerClose, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerClose,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/historial")({
@@ -33,6 +40,30 @@ type Factura = {
     concepto_mora: number;
   };
 };
+
+const ESTADO_FACTURA_LABELS: Record<string, string> = {
+  pendiente: "Pendiente",
+  vencida: "Vencida",
+  en_disputa: "En disputa",
+  anulada: "Anulada",
+  pagada: "Pagada",
+};
+
+const ESTADO_FACTURA_COLORS: Record<string, string> = {
+  pendiente: "bg-yellow-100 text-yellow-800",
+  vencida: "bg-red-100 text-red-800",
+  en_disputa: "bg-orange-100 text-orange-800",
+  anulada: "bg-gray-100 text-gray-700",
+  pagada: "bg-green-100 text-green-800",
+};
+
+function formatEstadoFactura(estado: string): string {
+  return ESTADO_FACTURA_LABELS[estado] ?? estado;
+}
+
+function getEstadoFacturaColor(estado: string): string {
+  return ESTADO_FACTURA_COLORS[estado] ?? "bg-gray-100 text-gray-700";
+}
 
 function HistorialPage() {
   const [facturas, setFacturas] = useState<Factura[]>([]);
@@ -113,7 +144,9 @@ function HistorialPage() {
       <div className="space-y-6">
         <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
           <h1 className="text-2xl font-bold text-foreground">Historial de Facturación</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Consulta tus recibos y facturas emitidas</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Consulta tus recibos y facturas emitidas
+          </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
@@ -170,18 +203,14 @@ function HistorialPage() {
                     <td className="px-6 py-4 font-medium text-foreground">{factura.periodo}</td>
                     <td className="px-6 py-4 text-muted-foreground">{factura.emision}</td>
                     <td className="px-6 py-4 text-muted-foreground">{factura.vencimiento}</td>
-                    <td className="px-6 py-4 text-right font-semibold">{factura.monto_total.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-right font-semibold">
+                      {factura.monto_total.toFixed(2)}
+                    </td>
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                          factura.estado === "cancelada"
-                            ? "bg-green-100 text-green-800"
-                            : factura.estado === "pendiente"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                        className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${getEstadoFacturaColor(factura.estado)}`}
                       >
-                        {factura.estado.charAt(0).toUpperCase() + factura.estado.slice(1)}
+                        {formatEstadoFactura(factura.estado)}
                       </span>
                     </td>
                   </tr>
@@ -207,7 +236,9 @@ function HistorialPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Monto Total</p>
-                    <p className="text-lg font-semibold">S/. {selectedFactura.monto_total.toFixed(2)}</p>
+                    <p className="text-lg font-semibold">
+                      S/. {selectedFactura.monto_total.toFixed(2)}
+                    </p>
                   </div>
                 </div>
 
@@ -215,7 +246,10 @@ function HistorialPage() {
                   <p className="font-semibold text-foreground">Desglose</p>
                   {[
                     { label: "Agua potable", monto: selectedFactura.detalles.concepto_consumo },
-                    { label: "Alcantarillado", monto: selectedFactura.detalles.concepto_alcantarillado },
+                    {
+                      label: "Alcantarillado",
+                      monto: selectedFactura.detalles.concepto_alcantarillado,
+                    },
                     { label: "Cargo fijo", monto: selectedFactura.detalles.concepto_cargo_fijo },
                     { label: "IGV", monto: selectedFactura.detalles.concepto_igv },
                     { label: "Mora", monto: selectedFactura.detalles.concepto_mora },

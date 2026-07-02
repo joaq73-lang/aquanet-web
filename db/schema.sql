@@ -9,23 +9,23 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================================
 -- ENUMS para estados categóricos
 -- ============================================================================
-CREATE TYPE estado_cliente AS ENUM ('activo', 'inactivo', 'suspendido', 'bloqueado');
+CREATE TYPE estado_cliente AS ENUM ('registrado', 'activo', 'suspendido', 'baja');
 CREATE TYPE tipo_cliente_disc AS ENUM ('individual', 'empresa');
 CREATE TYPE tipo_documento AS ENUM ('DNI', 'CE', 'RUC', 'PASAPORTE');
 CREATE TYPE tipo_suministro AS ENUM ('domiciliario', 'industrial', 'comercial', 'institucional');
-CREATE TYPE estado_suministro AS ENUM ('activo', 'inactivo', 'cortado', 'suspendido');
-CREATE TYPE estado_factura AS ENUM ('emitida', 'cancelada', 'parcial', 'vencida', 'anulada');
+CREATE TYPE estado_suministro AS ENUM ('registrado', 'activo', 'baja', 'suspendido');
+CREATE TYPE estado_factura AS ENUM ('pendiente', 'vencida', 'en_disputa', 'anulada', 'pagada');
 CREATE TYPE estado_pago AS ENUM ('pendiente', 'procesado', 'confirmado', 'rechazado', 'reembolsado');
 CREATE TYPE tipo_via AS ENUM ('AV', 'CA', 'JR', 'PJ', 'PS', 'CDA', 'ASOC', 'PTE', 'ZN', 'URB', 'COOP', 'VÍA');
 CREATE TYPE tipo_interior AS ENUM ('AP', 'LOTE', 'DPTO', 'MZNA', 'LT', 'PH', 'SN');
 CREATE TYPE modalidad_canal AS ENUM ('presencial', 'virtual', 'telefonica', 'automatica');
 CREATE TYPE tipo_canal AS ENUM ('agencia_sedapal', 'banco', 'cajero_automatico', 'portal_web', 'app_movil', 'telefonica');
 CREATE TYPE nombre_medio_pago AS ENUM ('tarjeta_credito', 'tarjeta_debito', 'efectivo', 'transferencia_bancaria', 'billetera_digital', 'cheque');
-CREATE TYPE estado_consulta AS ENUM ('registrada', 'asignada', 'en_proceso', 'respondida', 'cerrada');
-CREATE TYPE tipo_reclamo AS ENUM ('medidor_dañado', 'factura_error', 'servicio_deficiente', 'calidad_agua', 'otro');
-CREATE TYPE estado_reclamo AS ENUM ('registrado', 'asignado', 'en_investigacion', 'resuelto', 'cerrado', 'denegado');
+CREATE TYPE estado_consulta AS ENUM ('registrada', 'en_proceso', 'respondida', 'cerrada');
+CREATE TYPE tipo_reclamo AS ENUM ('facturacion', 'medidor_agua', 'servicio_agua_potable', 'servicio_alcantarillado', 'fugas_agua', 'conexion_agua_desague', 'corte_restablecimiento');
+CREATE TYPE estado_reclamo AS ENUM ('registrado', 'pendiente', 'en_evaluacion', 'observado', 'derivado', 'rechazado', 'resuelto', 'notificado');
 CREATE TYPE tipo_incidencia AS ENUM ('corte_emergencia', 'fuga', 'rotura_tuberia', 'mantenimiento', 'problema_calidad', 'bajo_presion', 'corte_programado');
-CREATE TYPE estado_incidencia AS ENUM ('reportada', 'asignada', 'en_proceso', 'resuelta', 'cerrada');
+CREATE TYPE estado_incidencia AS ENUM ('registrada', 'notificada', 'en_atencion', 'resuelta', 'cerrada');
 
 -- ============================================================================
 -- TABLA: CLIENTE (base para herencia)
@@ -175,7 +175,7 @@ CREATE TABLE factura (
   monto_concepto_mora DECIMAL(15, 2) DEFAULT 0.00,
   monto_total DECIMAL(15, 2) NOT NULL,
   monto_pagado DECIMAL(15, 2) DEFAULT 0.00,
-  estado_factura estado_factura DEFAULT 'emitida',
+  estado_factura estado_factura DEFAULT 'pendiente',
   FOREIGN KEY (codigo_suministro) REFERENCES suministro(codigo_suministro) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT ck_fecha_fin_mayor CHECK (fecha_fin_consumo >= fecha_inicio_consumo),
   CONSTRAINT ck_monto_pagado CHECK (monto_pagado <= monto_total AND monto_pagado >= 0)
@@ -243,7 +243,7 @@ CREATE TABLE reclamo (
   descripcion TEXT,
   fecha_notificacion_solucion_reclamo TIMESTAMP,
   fecha_solucion_reclamo TIMESTAMP,
-  estado_reclamo estado_reclamo DEFAULT 'registrado',
+  estado_reclamo estado_reclamo DEFAULT 'pendiente',
   FOREIGN KEY (codigo_cliente) REFERENCES cliente(codigo_cliente) ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (codigo_suministro) REFERENCES suministro(codigo_suministro) ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -263,7 +263,7 @@ CREATE TABLE incidencia (
   tiempo_resolucion_minutos INTEGER,
   total_suministros_afectados INTEGER DEFAULT 0,
   total_clientes_afectados INTEGER DEFAULT 0,
-  estado_incidencia estado_incidencia DEFAULT 'reportada',
+  estado_incidencia estado_incidencia DEFAULT 'registrada',
   descripcion TEXT,
   zona VARCHAR(100),
   ubigeo VARCHAR(6)
@@ -353,15 +353,15 @@ INSERT INTO canal_pago (modalidad_canal, tipo_canal, nombre_canal, dias_disponib
 
 -- Facturas de prueba
 INSERT INTO factura (codigo_suministro, fecha_inicio_consumo, fecha_fin_consumo, fecha_emision_factura, fecha_vencimiento_factura, consumo_agua_factura, monto_concepto_consumo, monto_concepto_alcantarillado, monto_concepto_cargo_fijo, monto_concepto_igv, monto_total, estado_factura) VALUES
-  (1, '2026-06-01', '2026-06-30', '2026-07-01', '2026-07-15', 35.50, 95.50, 45.20, 8.50, 17.44, 166.64, 'cancelada'),
-  (1, '2026-05-01', '2026-05-31', '2026-06-01', '2026-06-15', 42.30, 115.00, 52.50, 8.50, 25.75, 201.75, 'cancelada'),
+  (1, '2026-06-01', '2026-06-30', '2026-07-01', '2026-07-15', 35.50, 95.50, 45.20, 8.50, 17.44, 166.64, 'pagada'),
+  (1, '2026-05-01', '2026-05-31', '2026-06-01', '2026-06-15', 42.30, 115.00, 52.50, 8.50, 25.75, 201.75, 'pagada'),
   (2, '2026-06-01', '2026-06-30', '2026-07-01', '2026-07-15', 28.80, 78.00, 35.80, 8.50, 12.30, 134.60, 'vencida'),
-  (3, '2026-06-01', '2026-06-30', '2026-07-01', '2026-07-15', 120.00, 325.00, 150.00, 25.00, 62.50, 562.50, 'emitida');
+  (3, '2026-06-01', '2026-06-30', '2026-07-01', '2026-07-15', 120.00, 325.00, 150.00, 25.00, 62.50, 562.50, 'pendiente');
 
 -- Incidencias de prueba
 INSERT INTO incidencia (tipo_incidencia, fecha_inicio_incidencia, fecha_aviso_incidencia, estado_incidencia, descripcion, zona, ubigeo) VALUES
-  ('fuga', '2026-06-28 10:30:00', '2026-06-28 11:00:00', 'en_proceso', 'Fuga en tubería matriz de la avenida principal', 'San Juan de Miraflores', '150131'),
-  ('mantenimiento', '2026-07-01 08:00:00', '2026-07-01 08:15:00', 'en_proceso', 'Mantenimiento preventivo programado', 'San Juan de Miraflores', '150131');
+  ('fuga', '2026-06-28 10:30:00', '2026-06-28 11:00:00', 'en_atencion', 'Fuga en tubería matriz de la avenida principal', 'San Juan de Miraflores', '150131'),
+  ('mantenimiento', '2026-07-01 08:00:00', '2026-07-01 08:15:00', 'en_atencion', 'Mantenimiento preventivo programado', 'San Juan de Miraflores', '150131');
 
 -- Usuarios de prueba (password: Test1234! hash bcrypt)
 INSERT INTO usuario_sistema (codigo_cliente, email, password_hash, nombre_completo, activo) VALUES

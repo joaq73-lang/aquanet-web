@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/reclamos/registrar")({
 
         const result = await query(
           `INSERT INTO reclamo (codigo_cliente, codigo_suministro, tipo_reclamo, descripcion, estado_reclamo)
-           VALUES ($1, $2, $3, $4, 'registrado')
+           VALUES ($1, $2, $3, $4, 'pendiente')
            RETURNING *`,
           [auth.codigo_cliente, codigo_suministro || null, tipo_reclamo, descripcion],
         );

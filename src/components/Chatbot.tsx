@@ -60,6 +60,11 @@ const intents: Intent[] = [
     keywords: ["historial", "factura", "facturas", "recibo anterior", "consumo", "cuánto consumí"],
   },
   {
+    to: "/seguimiento-reclamos",
+    label: "Seguimiento de Reclamos",
+    keywords: ["seguimiento", "estado de mi reclamo", "cómo va mi reclamo"],
+  },
+  {
     to: "/reclamo",
     label: "Registrar Reclamo",
     keywords: ["reclamo", "reclamar", "queja", "quejarme", "denuncia", "problema", "mal servicio"],

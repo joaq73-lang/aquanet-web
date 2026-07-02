@@ -2,14 +2,24 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AlertTriangle, Clock3, MapPin, XCircle, CheckCircle2 } from "lucide-react";
 import AppShell from "@/components/AppShell";
-import { Drawer, DrawerContent, DrawerClose, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerClose,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/incidencias")({
   head: () => ({
     meta: [
       { title: "Incidencias — AQUANET" },
-      { name: "description", content: "Consulta y gestiona las incidencias en tu zona de servicio." },
+      {
+        name: "description",
+        content: "Consulta y gestiona las incidencias en tu zona de servicio.",
+      },
     ],
   }),
   component: IncidenciasPage,
@@ -59,12 +69,16 @@ function IncidenciasPage() {
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
-      case "reportada":
+      case "registrada":
         return "bg-blue-100 text-blue-800";
-      case "en_proceso":
+      case "notificada":
+        return "bg-purple-100 text-purple-800";
+      case "en_atencion":
         return "bg-yellow-100 text-yellow-800";
       case "resuelta":
         return "bg-green-100 text-green-800";
+      case "cerrada":
+        return "bg-gray-100 text-gray-700";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -103,7 +117,9 @@ function IncidenciasPage() {
         <div className="rounded-2xl border border-border bg-background p-12 text-center">
           <CheckCircle2 className="mx-auto h-12 w-12 text-green-600" />
           <h2 className="mt-4 text-lg font-semibold text-foreground">Sin incidencias activas</h2>
-          <p className="mt-2 text-sm text-muted-foreground">No hay incidencias reportadas en tu zona en este momento.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            No hay incidencias reportadas en tu zona en este momento.
+          </p>
         </div>
       </AppShell>
     );
@@ -114,7 +130,9 @@ function IncidenciasPage() {
       <div className="space-y-6">
         <div className="rounded-2xl border border-border bg-background p-6 shadow-sm">
           <h1 className="text-2xl font-bold text-foreground">Incidencias Activas</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Incidencias reportadas en tu zona de servicio</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Incidencias reportadas en tu zona de servicio
+          </p>
         </div>
 
         <div className="space-y-4">
@@ -135,7 +153,9 @@ function IncidenciasPage() {
                       <h3 className="font-semibold text-foreground">{incidencia.tipo}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">{incidencia.zona}</p>
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getEstadoColor(incidencia.estado)}`}>
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${getEstadoColor(incidencia.estado)}`}
+                    >
                       {incidencia.estado.replace(/_/g, " ")}
                     </span>
                   </div>
@@ -167,11 +187,15 @@ function IncidenciasPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Inicio</p>
-                    <p className="text-sm font-medium">{new Date(selectedIncidencia.fecha_inicio).toLocaleString()}</p>
+                    <p className="text-sm font-medium">
+                      {new Date(selectedIncidencia.fecha_inicio).toLocaleString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Estado</p>
-                    <p className="text-sm font-medium">{selectedIncidencia.estado.replace(/_/g, " ")}</p>
+                    <p className="text-sm font-medium">
+                      {selectedIncidencia.estado.replace(/_/g, " ")}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Suministros afectados</p>
@@ -180,7 +204,9 @@ function IncidenciasPage() {
                   {selectedIncidencia.tiempo_resolucion && (
                     <div>
                       <p className="text-xs text-muted-foreground">Tiempo de resolución</p>
-                      <p className="text-sm font-medium">{selectedIncidencia.tiempo_resolucion} minutos</p>
+                      <p className="text-sm font-medium">
+                        {selectedIncidencia.tiempo_resolucion} minutos
+                      </p>
                     </div>
                   )}
                 </div>

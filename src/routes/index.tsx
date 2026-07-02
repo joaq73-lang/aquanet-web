@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   CreditCard,
@@ -38,38 +38,48 @@ export const Route = createFileRoute("/")({
 });
 
 const services = [
-  { icon: CreditCard, title: "Realizar Pago", desc: "Paga tus recibos de manera fácil y segura." },
+  {
+    icon: CreditCard,
+    title: "Realizar Pago",
+    desc: "Paga tus recibos de manera fácil y segura.",
+    to: "/realizar-pago",
+  },
   {
     icon: AlertTriangle,
     title: "Incidencias",
     desc: "Reporta y revisa problemas técnicos o averías en la red.",
+    to: "/incidencias",
   },
   {
     icon: MapPin,
     title: "Puntos de pago físicos",
     desc: "Encuentra los centros y agencias autorizadas más cercanos.",
+    to: "/lugares-pago",
   },
   {
     icon: FileText,
     title: "Historial de Facturación",
     desc: "Consulta tu saldo, consumos anteriores y últimos recibos.",
+    to: "/historial",
   },
   {
     icon: ClipboardList,
     title: "Registrar Reclamo",
     desc: "Reporta problemas comerciales o incidencias del servicio.",
+    to: "/reclamo",
   },
   {
     icon: FileCheck,
     title: "Trámites y Certificados",
     desc: "Solicita nuevos servicios, conexiones o documentos.",
+    to: null,
   },
 ];
 
 const quickLinks = [
-  { icon: Scissors, label: "Cortes Programados" },
-  { icon: Lightbulb, label: "Consejos de Ahorro" },
-  { icon: HelpCircle, label: "Preguntas Frecuentes" },
+  { icon: Scissors, label: "Cortes Programados", to: "/incidencias" },
+  { icon: Lightbulb, label: "Consejos de Ahorro", to: null },
+  { icon: HelpCircle, label: "Preguntas Frecuentes", to: null },
 ];
 
 type AuthView = "login" | "register" | "forgot";
@@ -103,6 +113,7 @@ const initialRegisterForm: RegisterForm = {
 };
 
 function Index() {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authView, setAuthView] = useState<AuthView>("login");
   const [loginEmail, setLoginEmail] = useState("prueba@aquanet.test");
@@ -714,7 +725,10 @@ function Index() {
                   Av. Los Próceres 1234, San Juan de Lurigancho
                 </span>
               </div>
-              <button className="mt-3 w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-deep transition">
+              <button
+                onClick={() => navigate({ to: "/historial" })}
+                className="mt-3 w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-deep transition"
+              >
                 Ver detalle
               </button>
             </div>
@@ -728,16 +742,19 @@ function Index() {
             <ul className="space-y-1">
               {quickLinks.map((q) => (
                 <li key={q.label}>
-                  <a
-                    href="#"
-                    className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-foreground hover:bg-secondary transition"
+                  <button
+                    type="button"
+                    onClick={() =>
+                      q.to ? navigate({ to: q.to }) : alert(`${q.label}: próximamente disponible.`)
+                    }
+                    className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm text-foreground hover:bg-secondary transition"
                   >
                     <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary-soft text-primary-deep">
                       <q.icon className="h-4 w-4" />
                     </span>
-                    <span className="flex-1">{q.label}</span>
+                    <span className="flex-1 text-left">{q.label}</span>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </a>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -769,20 +786,36 @@ function Index() {
         <section>
           <h3 className="text-lg font-semibold text-foreground mb-4">¿Qué deseas hacer hoy?</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {services.map((s) => (
-              <Link
-                key={s.title}
-                to={s.title === "Registrar Reclamo" ? "/reclamo" : "/"}
-                className="group text-left rounded-2xl bg-card p-5 border border-border transition hover:-translate-y-0.5 hover:border-primary/30"
-                style={{ boxShadow: "var(--shadow-card)" }}
-              >
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary-soft text-primary-deep mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition">
-                  <s.icon className="h-6 w-6" />
-                </div>
-                <h4 className="font-semibold text-primary-deep">{s.title}</h4>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
-              </Link>
-            ))}
+            {services.map((s) =>
+              s.to ? (
+                <Link
+                  key={s.title}
+                  to={s.to}
+                  className="group text-left rounded-2xl bg-card p-5 border border-border transition hover:-translate-y-0.5 hover:border-primary/30"
+                  style={{ boxShadow: "var(--shadow-card)" }}
+                >
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary-soft text-primary-deep mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition">
+                    <s.icon className="h-6 w-6" />
+                  </div>
+                  <h4 className="font-semibold text-primary-deep">{s.title}</h4>
+                  <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+                </Link>
+              ) : (
+                <button
+                  key={s.title}
+                  type="button"
+                  onClick={() => alert(`${s.title}: próximamente disponible.`)}
+                  className="group text-left rounded-2xl bg-card p-5 border border-border transition hover:-translate-y-0.5 hover:border-primary/30"
+                  style={{ boxShadow: "var(--shadow-card)" }}
+                >
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary-soft text-primary-deep mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition">
+                    <s.icon className="h-6 w-6" />
+                  </div>
+                  <h4 className="font-semibold text-primary-deep">{s.title}</h4>
+                  <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+                </button>
+              ),
+            )}
           </div>
         </section>
 
@@ -797,7 +830,10 @@ function Index() {
                 Mantenimiento programado este sábado en sectores de Lima Norte.
               </p>
             </div>
-            <button className="inline-flex items-center gap-1 rounded-lg bg-primary-deep px-3 sm:px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition shrink-0">
+            <button
+              onClick={() => navigate({ to: "/incidencias" })}
+              className="inline-flex items-center gap-1 rounded-lg bg-primary-deep px-3 sm:px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 transition shrink-0"
+            >
               Ver más <ChevronRight className="h-4 w-4" />
             </button>
           </div>

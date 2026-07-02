@@ -1,6 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback, useRef } from "react";
-import { ArrowLeft, Send, UploadCloud, CalendarDays, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  UploadCloud,
+  CalendarDays,
+  Loader2,
+  CheckCircle2,
+  Hash,
+  Calendar,
+  FileText,
+  MapPin,
+  Info,
+  Search,
+  Home,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,21 +39,49 @@ export const Route = createFileRoute("/reclamo")({
 });
 
 const tiposReclamo = [
-  { value: "facturacion", label: "Facturación", tipoReclamoDb: "factura_error" },
-  { value: "calidad", label: "Calidad del servicio", tipoReclamoDb: "calidad_agua" },
-  { value: "presion", label: "Presión del agua", tipoReclamoDb: "servicio_deficiente" },
-  { value: "corte", label: "Corte del servicio", tipoReclamoDb: "servicio_deficiente" },
-  { value: "infraestructura", label: "Infraestructura", tipoReclamoDb: "otro" },
+  { value: "facturacion", label: "Facturación", tipoReclamoDb: "facturacion" },
+  { value: "medidor_agua", label: "Medidor de agua", tipoReclamoDb: "medidor_agua" },
+  {
+    value: "servicio_agua_potable",
+    label: "Servicio de agua potable",
+    tipoReclamoDb: "servicio_agua_potable",
+  },
+  {
+    value: "servicio_alcantarillado",
+    label: "Servicio de alcantarillado",
+    tipoReclamoDb: "servicio_alcantarillado",
+  },
+  { value: "fugas_agua", label: "Fugas de agua", tipoReclamoDb: "fugas_agua" },
+  {
+    value: "conexion_agua_desague",
+    label: "Conexión de agua o desagüe",
+    tipoReclamoDb: "conexion_agua_desague",
+  },
+  {
+    value: "corte_restablecimiento",
+    label: "Corte o restablecimiento del servicio",
+    tipoReclamoDb: "corte_restablecimiento",
+  },
 ] as const;
+
+type ReclamoRegistrado = {
+  codigo: string;
+  fechaRegistro: string;
+  tipoLabel: string;
+  direccion: string;
+  estado: string;
+};
 
 function RegistrarReclamoPage() {
   const navigate = useNavigate();
   const [tipo, setTipo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState("");
+  const [direccion, setDireccion] = useState("Av. Los Próceres 1234 - San Juan de Lurigancho");
   const [archivo, setArchivo] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [reclamoRegistrado, setReclamoRegistrado] = useState<ReclamoRegistrado | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -85,8 +127,20 @@ function RegistrarReclamoPage() {
         return;
       }
 
-      alert("Tu reclamo fue registrado correctamente.");
-      navigate({ to: "/" });
+      const data = await response.json();
+      setReclamoRegistrado({
+        codigo: `RC-${new Date().getFullYear()}-${String(data.reclamo.codigo_reclamo).padStart(6, "0")}`,
+        fechaRegistro: new Date(data.reclamo.fecha_registro).toLocaleString("es-PE", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        tipoLabel: tipoSeleccionado.label,
+        direccion,
+        estado: data.reclamo.estado,
+      });
     } catch (error) {
       console.error("Error registrando reclamo:", error);
       alert("Error de conexión. Por favor, intenta de nuevo.");
@@ -94,6 +148,91 @@ function RegistrarReclamoPage() {
       setSubmitting(false);
     }
   };
+
+  if (reclamoRegistrado) {
+    return (
+      <AppShell>
+        <div className="p-4 sm:p-8">
+          <div className="mx-auto max-w-md space-y-6 text-center">
+            <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-100">
+              <CheckCircle2 className="h-11 w-11 text-emerald-600" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold uppercase tracking-wide text-foreground">
+                ¡Reclamo registrado exitosamente!
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Tu reclamo ha sido enviado correctamente. Nuestro equipo lo atenderá en breve.
+              </p>
+            </div>
+
+            <div className="space-y-3 rounded-2xl border border-border bg-card p-5 text-left">
+              <div className="flex items-center gap-3">
+                <Hash className="h-4 w-4 shrink-0 text-primary" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Código de Reclamo:</p>
+                  <p className="font-semibold text-primary-deep">{reclamoRegistrado.codigo}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 shrink-0 text-primary" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Fecha de Registro:</p>
+                  <p className="font-semibold text-foreground">{reclamoRegistrado.fechaRegistro}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <FileText className="h-4 w-4 shrink-0 text-primary" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Tipo de Reclamo:</p>
+                  <p className="font-semibold text-foreground">{reclamoRegistrado.tipoLabel}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Dirección:</p>
+                  <p className="font-semibold text-foreground">{reclamoRegistrado.direccion}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Info className="h-4 w-4 shrink-0 text-primary" />
+                <div className="text-sm">
+                  <p className="text-muted-foreground">Estado Actual:</p>
+                  <span className="inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold uppercase text-amber-800">
+                    {reclamoRegistrado.estado}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary-soft/40 p-4 text-left text-sm text-primary-deep">
+              <Search className="mt-0.5 h-4 w-4 shrink-0" />
+              <p>
+                Puedes realizar el seguimiento de tu reclamo en la opción{" "}
+                <span className="font-semibold">"Seguimiento de Reclamos"</span> del menú principal.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                variant="outline"
+                className="flex-1 gap-2"
+                onClick={() => navigate({ to: "/seguimiento-reclamos" })}
+              >
+                <Search className="h-4 w-4" />
+                Ver seguimiento
+              </Button>
+              <Button className="flex-1 gap-2" onClick={() => navigate({ to: "/" })}>
+                <Home className="h-4 w-4" />
+                Volver al inicio
+              </Button>
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
@@ -199,7 +338,8 @@ function RegistrarReclamoPage() {
                   </Label>
                   <Input
                     placeholder="Ej. Av. Los Próceres 1234 - San Juan de Lurigancho"
-                    defaultValue="Av. Los Próceres 1234 - San Juan de Lurigancho"
+                    value={direccion}
+                    onChange={(e) => setDireccion(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1.5">

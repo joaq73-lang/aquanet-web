@@ -8,10 +8,25 @@ import {
   MapPin,
   FileText,
   ClipboardList,
+  Search,
   LogOut,
   Droplets,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+
+const notificaciones = [
+  {
+    title: "Mantenimiento programado",
+    description: "Corte de agua este sábado en sectores de Lima Norte de 8:00 a.m. a 2:00 p.m.",
+    fecha: "Hace 2 horas",
+  },
+  {
+    title: "Recibo disponible",
+    description: "Tu recibo del periodo actual ya está disponible para su pago.",
+    fecha: "Hace 1 día",
+  },
+];
 
 const navItems: Array<{ icon: typeof Home; label: string; to: string }> = [
   { icon: Home, label: "Inicio", to: "/" },
@@ -20,6 +35,7 @@ const navItems: Array<{ icon: typeof Home; label: string; to: string }> = [
   { icon: MapPin, label: "Lugares de pago", to: "/lugares-pago" },
   { icon: FileText, label: "Historial de Facturación", to: "/historial" },
   { icon: ClipboardList, label: "Registrar Reclamo", to: "/reclamo" },
+  { icon: Search, label: "Seguimiento de Reclamos", to: "/seguimiento-reclamos" },
 ];
 
 interface AppShellProps {
@@ -49,15 +65,35 @@ export default function AppShell({ children, rightPanel, onLogout }: AppShellPro
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
-          <button
-            className="relative grid h-10 w-10 place-items-center rounded-full hover:bg-white/10 transition"
-            aria-label="Notificaciones"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full bg-warning text-[11px] font-bold text-foreground ring-2 ring-[#044c9b]">
-              2
-            </span>
-          </button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="relative grid h-10 w-10 place-items-center rounded-full hover:bg-white/10 transition"
+                aria-label="Notificaciones"
+              >
+                <Bell className="h-5 w-5" />
+                <span className="absolute -top-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full bg-warning text-[11px] font-bold text-foreground ring-2 ring-[#044c9b]">
+                  {notificaciones.length}
+                </span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80 p-0">
+              <div className="border-b border-border px-4 py-3">
+                <p className="text-sm font-semibold text-foreground">Notificaciones</p>
+              </div>
+              <div className="max-h-80 overflow-y-auto divide-y divide-border">
+                {notificaciones.map((notificacion) => (
+                  <div key={notificacion.title} className="px-4 py-3">
+                    <p className="text-sm font-medium text-foreground">{notificacion.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{notificacion.description}</p>
+                    <p className="mt-1 text-[11px] text-muted-foreground/70">
+                      {notificacion.fecha}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
           <div className="flex items-center gap-2 pl-2 sm:pl-3 sm:border-l border-white/20">
             <div className="grid h-9 w-9 place-items-center rounded-full bg-white text-primary-deep font-bold text-sm">
               CP

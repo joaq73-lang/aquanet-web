@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SeguimientoReclamosRouteImport } from './routes/seguimiento-reclamos'
 import { Route as ReclamoRouteImport } from './routes/reclamo'
 import { Route as RealizarPagoRouteImport } from './routes/realizar-pago'
 import { Route as LugaresPagoRouteImport } from './routes/lugares-pago'
@@ -30,6 +31,11 @@ import { Route as ApiAuthRegisterRouteImport } from './routes/api/auth/register'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
 import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 
+const SeguimientoReclamosRoute = SeguimientoReclamosRouteImport.update({
+  id: '/seguimiento-reclamos',
+  path: '/seguimiento-reclamos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReclamoRoute = ReclamoRouteImport.update({
   id: '/reclamo',
   path: '/reclamo',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/lugares-pago': typeof LugaresPagoRoute
   '/realizar-pago': typeof RealizarPagoRoute
   '/reclamo': typeof ReclamoRoute
+  '/seguimiento-reclamos': typeof SeguimientoReclamosRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/register': typeof ApiAuthRegisterRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/lugares-pago': typeof LugaresPagoRoute
   '/realizar-pago': typeof RealizarPagoRoute
   '/reclamo': typeof ReclamoRoute
+  '/seguimiento-reclamos': typeof SeguimientoReclamosRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/register': typeof ApiAuthRegisterRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/lugares-pago': typeof LugaresPagoRoute
   '/realizar-pago': typeof RealizarPagoRoute
   '/reclamo': typeof ReclamoRoute
+  '/seguimiento-reclamos': typeof SeguimientoReclamosRoute
   '/api/auth/login': typeof ApiAuthLoginRoute
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/register': typeof ApiAuthRegisterRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/lugares-pago'
     | '/realizar-pago'
     | '/reclamo'
+    | '/seguimiento-reclamos'
     | '/api/auth/login'
     | '/api/auth/me'
     | '/api/auth/register'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/lugares-pago'
     | '/realizar-pago'
     | '/reclamo'
+    | '/seguimiento-reclamos'
     | '/api/auth/login'
     | '/api/auth/me'
     | '/api/auth/register'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/lugares-pago'
     | '/realizar-pago'
     | '/reclamo'
+    | '/seguimiento-reclamos'
     | '/api/auth/login'
     | '/api/auth/me'
     | '/api/auth/register'
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   LugaresPagoRoute: typeof LugaresPagoRoute
   RealizarPagoRoute: typeof RealizarPagoRoute
   ReclamoRoute: typeof ReclamoRoute
+  SeguimientoReclamosRoute: typeof SeguimientoReclamosRoute
   ApiAuthLoginRoute: typeof ApiAuthLoginRoute
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiAuthRegisterRoute: typeof ApiAuthRegisterRoute
@@ -292,6 +305,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/seguimiento-reclamos': {
+      id: '/seguimiento-reclamos'
+      path: '/seguimiento-reclamos'
+      fullPath: '/seguimiento-reclamos'
+      preLoaderRoute: typeof SeguimientoReclamosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reclamo': {
       id: '/reclamo'
       path: '/reclamo'
@@ -442,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   LugaresPagoRoute: LugaresPagoRoute,
   RealizarPagoRoute: RealizarPagoRoute,
   ReclamoRoute: ReclamoRoute,
+  SeguimientoReclamosRoute: SeguimientoReclamosRoute,
   ApiAuthLoginRoute: ApiAuthLoginRoute,
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiAuthRegisterRoute: ApiAuthRegisterRoute,

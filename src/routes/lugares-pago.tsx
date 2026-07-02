@@ -74,11 +74,27 @@ const puntosDePago: PaymentPoint[] = [
   },
 ];
 
+const distritosLima = [
+  "Cercado de Lima",
+  "San Juan de Lurigancho",
+  "San Juan de Miraflores",
+  "San Martín de Porres",
+  "Ate",
+  "Comas",
+  "Villa El Salvador",
+  "Villa María del Triunfo",
+  "Los Olivos",
+  "San Miguel",
+  "Surco",
+  "Miraflores",
+  "La Molina",
+  "Callao",
+];
+
 function LugaresPagoPage() {
   const [searchState, setSearchState] = useState<SearchState>("search");
   const [scenario, setScenario] = useState<Scenario>("with");
-  const [region, setRegion] = useState<string>("");
-  const [tipo, setTipo] = useState<string>("");
+  const [distrito, setDistrito] = useState<string>("");
   const [selectedPoint, setSelectedPoint] = useState<PaymentPoint | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -88,8 +104,8 @@ function LugaresPagoPage() {
   }, [scenario]);
 
   const handleBuscar = () => {
-    if (!region || !tipo) {
-      alert("Por favor selecciona región y tipo de canal");
+    if (!distrito) {
+      alert("Por favor selecciona un distrito");
       return;
     }
     setSearchState("loading");
@@ -106,8 +122,7 @@ function LugaresPagoPage() {
 
   const handleVolver = () => {
     setSearchState("search");
-    setRegion("");
-    setTipo("");
+    setDistrito("");
     setSelectedPoint(null);
     setExpandedId(null);
   };
@@ -135,36 +150,22 @@ function LugaresPagoPage() {
             <div className="rounded-3xl border border-border bg-card p-6">
               <h2 className="font-semibold text-foreground mb-6">Buscar puntos de pago</h2>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Región / Provincia
+                    Distrito de Lima
                   </label>
                   <select
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
+                    value={distrito}
+                    onChange={(e) => setDistrito(e.target.value)}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                   >
-                    <option value="">Selecciona una región...</option>
-                    <option value="lima">Lima</option>
-                    <option value="callao">Callao</option>
-                    <option value="ica">Ica</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Tipo de canal
-                  </label>
-                  <select
-                    value={tipo}
-                    onChange={(e) => setTipo(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  >
-                    <option value="">Selecciona un tipo...</option>
-                    <option value="agencias">Agencias SEDAPAL</option>
-                    <option value="bancos">Bancos autorizados</option>
-                    <option value="agentes">Agentes multibanco</option>
+                    <option value="">Selecciona un distrito...</option>
+                    {distritosLima.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

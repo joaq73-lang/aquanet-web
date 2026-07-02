@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/pagos/registrar")({
         // Actualizar montos en factura
         const nuevoMontoPagado = parseFloat(factura.monto_pagado) + monto_pagado;
         const nuevoEstado =
-          nuevoMontoPagado >= parseFloat(factura.monto_total) ? "cancelada" : "parcial";
+          nuevoMontoPagado >= parseFloat(factura.monto_total) ? "pagada" : "pendiente";
 
         await query(
           `UPDATE factura SET monto_pagado = $1, estado_factura = $2 WHERE codigo_factura = $3`,
