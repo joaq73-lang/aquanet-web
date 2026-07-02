@@ -15,6 +15,20 @@ import { Route as LugaresPagoRouteImport } from './routes/lugares-pago'
 import { Route as IncidenciasRouteImport } from './routes/incidencias'
 import { Route as HistorialRouteImport } from './routes/historial'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiSuministrosListRouteImport } from './routes/api/suministros/list'
+import { Route as ApiReclamosRegistrarRouteImport } from './routes/api/reclamos/registrar'
+import { Route as ApiReclamosListRouteImport } from './routes/api/reclamos/list'
+import { Route as ApiPagosRegistrarRouteImport } from './routes/api/pagos/registrar'
+import { Route as ApiMediosPagoListRouteImport } from './routes/api/medios-pago/list'
+import { Route as ApiIncidenciasListRouteImport } from './routes/api/incidencias/list'
+import { Route as ApiFacturasListRouteImport } from './routes/api/facturas/list'
+import { Route as ApiConsultasRegistrarRouteImport } from './routes/api/consultas/registrar'
+import { Route as ApiClientesPerfilRouteImport } from './routes/api/clientes/perfil'
+import { Route as ApiClientesDireccionRouteImport } from './routes/api/clientes/direccion'
+import { Route as ApiCanalesListRouteImport } from './routes/api/canales/list'
+import { Route as ApiAuthRegisterRouteImport } from './routes/api/auth/register'
+import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
 
 const ReclamoRoute = ReclamoRouteImport.update({
   id: '/reclamo',
@@ -46,6 +60,76 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSuministrosListRoute = ApiSuministrosListRouteImport.update({
+  id: '/api/suministros/list',
+  path: '/api/suministros/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReclamosRegistrarRoute = ApiReclamosRegistrarRouteImport.update({
+  id: '/api/reclamos/registrar',
+  path: '/api/reclamos/registrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReclamosListRoute = ApiReclamosListRouteImport.update({
+  id: '/api/reclamos/list',
+  path: '/api/reclamos/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPagosRegistrarRoute = ApiPagosRegistrarRouteImport.update({
+  id: '/api/pagos/registrar',
+  path: '/api/pagos/registrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMediosPagoListRoute = ApiMediosPagoListRouteImport.update({
+  id: '/api/medios-pago/list',
+  path: '/api/medios-pago/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiIncidenciasListRoute = ApiIncidenciasListRouteImport.update({
+  id: '/api/incidencias/list',
+  path: '/api/incidencias/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiFacturasListRoute = ApiFacturasListRouteImport.update({
+  id: '/api/facturas/list',
+  path: '/api/facturas/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiConsultasRegistrarRoute = ApiConsultasRegistrarRouteImport.update({
+  id: '/api/consultas/registrar',
+  path: '/api/consultas/registrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiClientesPerfilRoute = ApiClientesPerfilRouteImport.update({
+  id: '/api/clientes/perfil',
+  path: '/api/clientes/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiClientesDireccionRoute = ApiClientesDireccionRouteImport.update({
+  id: '/api/clientes/direccion',
+  path: '/api/clientes/direccion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCanalesListRoute = ApiCanalesListRouteImport.update({
+  id: '/api/canales/list',
+  path: '/api/canales/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthRegisterRoute = ApiAuthRegisterRouteImport.update({
+  id: '/api/auth/register',
+  path: '/api/auth/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
+  id: '/api/auth/me',
+  path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +138,20 @@ export interface FileRoutesByFullPath {
   '/lugares-pago': typeof LugaresPagoRoute
   '/realizar-pago': typeof RealizarPagoRoute
   '/reclamo': typeof ReclamoRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
+  '/api/canales/list': typeof ApiCanalesListRoute
+  '/api/clientes/direccion': typeof ApiClientesDireccionRoute
+  '/api/clientes/perfil': typeof ApiClientesPerfilRoute
+  '/api/consultas/registrar': typeof ApiConsultasRegistrarRoute
+  '/api/facturas/list': typeof ApiFacturasListRoute
+  '/api/incidencias/list': typeof ApiIncidenciasListRoute
+  '/api/medios-pago/list': typeof ApiMediosPagoListRoute
+  '/api/pagos/registrar': typeof ApiPagosRegistrarRoute
+  '/api/reclamos/list': typeof ApiReclamosListRoute
+  '/api/reclamos/registrar': typeof ApiReclamosRegistrarRoute
+  '/api/suministros/list': typeof ApiSuministrosListRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +160,20 @@ export interface FileRoutesByTo {
   '/lugares-pago': typeof LugaresPagoRoute
   '/realizar-pago': typeof RealizarPagoRoute
   '/reclamo': typeof ReclamoRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
+  '/api/canales/list': typeof ApiCanalesListRoute
+  '/api/clientes/direccion': typeof ApiClientesDireccionRoute
+  '/api/clientes/perfil': typeof ApiClientesPerfilRoute
+  '/api/consultas/registrar': typeof ApiConsultasRegistrarRoute
+  '/api/facturas/list': typeof ApiFacturasListRoute
+  '/api/incidencias/list': typeof ApiIncidenciasListRoute
+  '/api/medios-pago/list': typeof ApiMediosPagoListRoute
+  '/api/pagos/registrar': typeof ApiPagosRegistrarRoute
+  '/api/reclamos/list': typeof ApiReclamosListRoute
+  '/api/reclamos/registrar': typeof ApiReclamosRegistrarRoute
+  '/api/suministros/list': typeof ApiSuministrosListRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +183,20 @@ export interface FileRoutesById {
   '/lugares-pago': typeof LugaresPagoRoute
   '/realizar-pago': typeof RealizarPagoRoute
   '/reclamo': typeof ReclamoRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/register': typeof ApiAuthRegisterRoute
+  '/api/canales/list': typeof ApiCanalesListRoute
+  '/api/clientes/direccion': typeof ApiClientesDireccionRoute
+  '/api/clientes/perfil': typeof ApiClientesPerfilRoute
+  '/api/consultas/registrar': typeof ApiConsultasRegistrarRoute
+  '/api/facturas/list': typeof ApiFacturasListRoute
+  '/api/incidencias/list': typeof ApiIncidenciasListRoute
+  '/api/medios-pago/list': typeof ApiMediosPagoListRoute
+  '/api/pagos/registrar': typeof ApiPagosRegistrarRoute
+  '/api/reclamos/list': typeof ApiReclamosListRoute
+  '/api/reclamos/registrar': typeof ApiReclamosRegistrarRoute
+  '/api/suministros/list': typeof ApiSuministrosListRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +207,20 @@ export interface FileRouteTypes {
     | '/lugares-pago'
     | '/realizar-pago'
     | '/reclamo'
+    | '/api/auth/login'
+    | '/api/auth/me'
+    | '/api/auth/register'
+    | '/api/canales/list'
+    | '/api/clientes/direccion'
+    | '/api/clientes/perfil'
+    | '/api/consultas/registrar'
+    | '/api/facturas/list'
+    | '/api/incidencias/list'
+    | '/api/medios-pago/list'
+    | '/api/pagos/registrar'
+    | '/api/reclamos/list'
+    | '/api/reclamos/registrar'
+    | '/api/suministros/list'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +229,20 @@ export interface FileRouteTypes {
     | '/lugares-pago'
     | '/realizar-pago'
     | '/reclamo'
+    | '/api/auth/login'
+    | '/api/auth/me'
+    | '/api/auth/register'
+    | '/api/canales/list'
+    | '/api/clientes/direccion'
+    | '/api/clientes/perfil'
+    | '/api/consultas/registrar'
+    | '/api/facturas/list'
+    | '/api/incidencias/list'
+    | '/api/medios-pago/list'
+    | '/api/pagos/registrar'
+    | '/api/reclamos/list'
+    | '/api/reclamos/registrar'
+    | '/api/suministros/list'
   id:
     | '__root__'
     | '/'
@@ -97,6 +251,20 @@ export interface FileRouteTypes {
     | '/lugares-pago'
     | '/realizar-pago'
     | '/reclamo'
+    | '/api/auth/login'
+    | '/api/auth/me'
+    | '/api/auth/register'
+    | '/api/canales/list'
+    | '/api/clientes/direccion'
+    | '/api/clientes/perfil'
+    | '/api/consultas/registrar'
+    | '/api/facturas/list'
+    | '/api/incidencias/list'
+    | '/api/medios-pago/list'
+    | '/api/pagos/registrar'
+    | '/api/reclamos/list'
+    | '/api/reclamos/registrar'
+    | '/api/suministros/list'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +274,20 @@ export interface RootRouteChildren {
   LugaresPagoRoute: typeof LugaresPagoRoute
   RealizarPagoRoute: typeof RealizarPagoRoute
   ReclamoRoute: typeof ReclamoRoute
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiAuthRegisterRoute: typeof ApiAuthRegisterRoute
+  ApiCanalesListRoute: typeof ApiCanalesListRoute
+  ApiClientesDireccionRoute: typeof ApiClientesDireccionRoute
+  ApiClientesPerfilRoute: typeof ApiClientesPerfilRoute
+  ApiConsultasRegistrarRoute: typeof ApiConsultasRegistrarRoute
+  ApiFacturasListRoute: typeof ApiFacturasListRoute
+  ApiIncidenciasListRoute: typeof ApiIncidenciasListRoute
+  ApiMediosPagoListRoute: typeof ApiMediosPagoListRoute
+  ApiPagosRegistrarRoute: typeof ApiPagosRegistrarRoute
+  ApiReclamosListRoute: typeof ApiReclamosListRoute
+  ApiReclamosRegistrarRoute: typeof ApiReclamosRegistrarRoute
+  ApiSuministrosListRoute: typeof ApiSuministrosListRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +334,104 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/suministros/list': {
+      id: '/api/suministros/list'
+      path: '/api/suministros/list'
+      fullPath: '/api/suministros/list'
+      preLoaderRoute: typeof ApiSuministrosListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reclamos/registrar': {
+      id: '/api/reclamos/registrar'
+      path: '/api/reclamos/registrar'
+      fullPath: '/api/reclamos/registrar'
+      preLoaderRoute: typeof ApiReclamosRegistrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/reclamos/list': {
+      id: '/api/reclamos/list'
+      path: '/api/reclamos/list'
+      fullPath: '/api/reclamos/list'
+      preLoaderRoute: typeof ApiReclamosListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pagos/registrar': {
+      id: '/api/pagos/registrar'
+      path: '/api/pagos/registrar'
+      fullPath: '/api/pagos/registrar'
+      preLoaderRoute: typeof ApiPagosRegistrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/medios-pago/list': {
+      id: '/api/medios-pago/list'
+      path: '/api/medios-pago/list'
+      fullPath: '/api/medios-pago/list'
+      preLoaderRoute: typeof ApiMediosPagoListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/incidencias/list': {
+      id: '/api/incidencias/list'
+      path: '/api/incidencias/list'
+      fullPath: '/api/incidencias/list'
+      preLoaderRoute: typeof ApiIncidenciasListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/facturas/list': {
+      id: '/api/facturas/list'
+      path: '/api/facturas/list'
+      fullPath: '/api/facturas/list'
+      preLoaderRoute: typeof ApiFacturasListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/consultas/registrar': {
+      id: '/api/consultas/registrar'
+      path: '/api/consultas/registrar'
+      fullPath: '/api/consultas/registrar'
+      preLoaderRoute: typeof ApiConsultasRegistrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/clientes/perfil': {
+      id: '/api/clientes/perfil'
+      path: '/api/clientes/perfil'
+      fullPath: '/api/clientes/perfil'
+      preLoaderRoute: typeof ApiClientesPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/clientes/direccion': {
+      id: '/api/clientes/direccion'
+      path: '/api/clientes/direccion'
+      fullPath: '/api/clientes/direccion'
+      preLoaderRoute: typeof ApiClientesDireccionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/canales/list': {
+      id: '/api/canales/list'
+      path: '/api/canales/list'
+      fullPath: '/api/canales/list'
+      preLoaderRoute: typeof ApiCanalesListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/register': {
+      id: '/api/auth/register'
+      path: '/api/auth/register'
+      fullPath: '/api/auth/register'
+      preLoaderRoute: typeof ApiAuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/me': {
+      id: '/api/auth/me'
+      path: '/api/auth/me'
+      fullPath: '/api/auth/me'
+      preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +442,20 @@ const rootRouteChildren: RootRouteChildren = {
   LugaresPagoRoute: LugaresPagoRoute,
   RealizarPagoRoute: RealizarPagoRoute,
   ReclamoRoute: ReclamoRoute,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiAuthRegisterRoute: ApiAuthRegisterRoute,
+  ApiCanalesListRoute: ApiCanalesListRoute,
+  ApiClientesDireccionRoute: ApiClientesDireccionRoute,
+  ApiClientesPerfilRoute: ApiClientesPerfilRoute,
+  ApiConsultasRegistrarRoute: ApiConsultasRegistrarRoute,
+  ApiFacturasListRoute: ApiFacturasListRoute,
+  ApiIncidenciasListRoute: ApiIncidenciasListRoute,
+  ApiMediosPagoListRoute: ApiMediosPagoListRoute,
+  ApiPagosRegistrarRoute: ApiPagosRegistrarRoute,
+  ApiReclamosListRoute: ApiReclamosListRoute,
+  ApiReclamosRegistrarRoute: ApiReclamosRegistrarRoute,
+  ApiSuministrosListRoute: ApiSuministrosListRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
