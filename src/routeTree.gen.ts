@@ -26,6 +26,7 @@ import { Route as ApiFacturasListRouteImport } from './routes/api/facturas/list'
 import { Route as ApiConsultasRegistrarRouteImport } from './routes/api/consultas/registrar'
 import { Route as ApiClientesPerfilRouteImport } from './routes/api/clientes/perfil'
 import { Route as ApiClientesDireccionRouteImport } from './routes/api/clientes/direccion'
+import { Route as ApiChatInterpretarRouteImport } from './routes/api/chat/interpretar'
 import { Route as ApiCanalesListRouteImport } from './routes/api/canales/list'
 import { Route as ApiAuthRegisterRouteImport } from './routes/api/auth/register'
 import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
@@ -116,6 +117,11 @@ const ApiClientesDireccionRoute = ApiClientesDireccionRouteImport.update({
   path: '/api/clientes/direccion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatInterpretarRoute = ApiChatInterpretarRouteImport.update({
+  id: '/api/chat/interpretar',
+  path: '/api/chat/interpretar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCanalesListRoute = ApiCanalesListRouteImport.update({
   id: '/api/canales/list',
   path: '/api/canales/list',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/canales/list': typeof ApiCanalesListRoute
+  '/api/chat/interpretar': typeof ApiChatInterpretarRoute
   '/api/clientes/direccion': typeof ApiClientesDireccionRoute
   '/api/clientes/perfil': typeof ApiClientesPerfilRoute
   '/api/consultas/registrar': typeof ApiConsultasRegistrarRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/canales/list': typeof ApiCanalesListRoute
+  '/api/chat/interpretar': typeof ApiChatInterpretarRoute
   '/api/clientes/direccion': typeof ApiClientesDireccionRoute
   '/api/clientes/perfil': typeof ApiClientesPerfilRoute
   '/api/consultas/registrar': typeof ApiConsultasRegistrarRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/api/auth/me': typeof ApiAuthMeRoute
   '/api/auth/register': typeof ApiAuthRegisterRoute
   '/api/canales/list': typeof ApiCanalesListRoute
+  '/api/chat/interpretar': typeof ApiChatInterpretarRoute
   '/api/clientes/direccion': typeof ApiClientesDireccionRoute
   '/api/clientes/perfil': typeof ApiClientesPerfilRoute
   '/api/consultas/registrar': typeof ApiConsultasRegistrarRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/auth/register'
     | '/api/canales/list'
+    | '/api/chat/interpretar'
     | '/api/clientes/direccion'
     | '/api/clientes/perfil'
     | '/api/consultas/registrar'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/auth/register'
     | '/api/canales/list'
+    | '/api/chat/interpretar'
     | '/api/clientes/direccion'
     | '/api/clientes/perfil'
     | '/api/consultas/registrar'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/api/auth/me'
     | '/api/auth/register'
     | '/api/canales/list'
+    | '/api/chat/interpretar'
     | '/api/clientes/direccion'
     | '/api/clientes/perfil'
     | '/api/consultas/registrar'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   ApiAuthMeRoute: typeof ApiAuthMeRoute
   ApiAuthRegisterRoute: typeof ApiAuthRegisterRoute
   ApiCanalesListRoute: typeof ApiCanalesListRoute
+  ApiChatInterpretarRoute: typeof ApiChatInterpretarRoute
   ApiClientesDireccionRoute: typeof ApiClientesDireccionRoute
   ApiClientesPerfilRoute: typeof ApiClientesPerfilRoute
   ApiConsultasRegistrarRoute: typeof ApiConsultasRegistrarRoute
@@ -424,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiClientesDireccionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/interpretar': {
+      id: '/api/chat/interpretar'
+      path: '/api/chat/interpretar'
+      fullPath: '/api/chat/interpretar'
+      preLoaderRoute: typeof ApiChatInterpretarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/canales/list': {
       id: '/api/canales/list'
       path: '/api/canales/list'
@@ -467,6 +487,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthMeRoute: ApiAuthMeRoute,
   ApiAuthRegisterRoute: ApiAuthRegisterRoute,
   ApiCanalesListRoute: ApiCanalesListRoute,
+  ApiChatInterpretarRoute: ApiChatInterpretarRoute,
   ApiClientesDireccionRoute: ApiClientesDireccionRoute,
   ApiClientesPerfilRoute: ApiClientesPerfilRoute,
   ApiConsultasRegistrarRoute: ApiConsultasRegistrarRoute,

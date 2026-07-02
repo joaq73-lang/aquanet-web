@@ -100,42 +100,68 @@ export default function Chatbot({ open, onOpenChange }: ChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       from: "bot",
-      text: "Hola, soy el asistente de AQUANET. Cuéntame qué necesitas: pagar un recibo, reportar una incidencia, buscar un lugar de pago, ver tu historial de facturación o registrar un reclamo.",
+      text: "Hola, soy el asistente de AQUANET. Cuéntame qué necesitas: pagar un recibo, reportar una incidencia, buscar un lugar de pago, ver tu historial de facturación, registrar un reclamo o ver su seguimiento.",
     },
   ]);
   const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
 
-  const handleSend = () => {
-    const query = input.trim();
-    if (!query) return;
-
-    const intent = detectIntent(query);
-    const userMessage: Message = { from: "user", text: query };
-
-    if (!intent) {
-      setMessages((current) => [
-        ...current,
-        userMessage,
-        {
-          from: "bot",
-          text: "No estoy seguro de a dónde llevarte. Prueba mencionando: pagar, incidencias, lugares de pago, historial o reclamo.",
-        },
-      ]);
-      setInput("");
-      return;
-    }
-
-    setMessages((current) => [
-      ...current,
-      userMessage,
-      { from: "bot", text: `Te llevo a "${intent.label}"...` },
-    ]);
-    setInput("");
-
+  const goTo = (to: string, text: string) => {
+    setMessages((current) => [...current, { from: "bot", text }]);
     window.setTimeout(() => {
       onOpenChange(false);
-      navigate({ to: intent.to });
+      navigate({ to });
     }, 700);
+  };
+
+  const handleSend = async () => {
+    const query = input.trim();
+    if (!query || sending) return;
+
+    const userMessage: Message = { from: "user", text: query };
+    setMessages((current) => [...current, userMessage]);
+    setInput("");
+    setSending(true);
+
+    try {
+      const token = window.localStorage.getItem("aquanet-token");
+      const response = await fetch("/api/chat/interpretar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ mensaje: query }),
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo interpretar la consulta");
+      }
+
+      const data: { ruta: string | null; etiqueta: string | null; mensaje: string } =
+        await response.json();
+
+      if (data.ruta) {
+        goTo(data.ruta, data.mensaje);
+      } else {
+        setMessages((current) => [...current, { from: "bot", text: data.mensaje }]);
+      }
+    } catch {
+      const intent = detectIntent(query);
+      if (!intent) {
+        setMessages((current) => [
+          ...current,
+          {
+            from: "bot",
+            text: "No estoy seguro de a dónde llevarte. Prueba mencionando: pagar, incidencias, lugares de pago, historial, seguimiento o reclamo.",
+          },
+        ]);
+      } else {
+        goTo(intent.to, `Te llevo a "${intent.label}"...`);
+      }
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -188,6 +214,16 @@ export default function Chatbot({ open, onOpenChange }: ChatbotProps) {
               </div>
             </div>
           ))}
+          {sending && (
+            <div className="flex items-start gap-2">
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-soft text-primary-deep">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className="max-w-[80%] rounded-2xl bg-muted px-4 py-2.5 text-sm text-muted-foreground">
+                Pensando...
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2 border-t border-border p-4">
@@ -195,14 +231,16 @@ export default function Chatbot({ open, onOpenChange }: ChatbotProps) {
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={sending}
             placeholder="Ej. quiero pagar mi recibo"
-            className="flex-1 rounded-full border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary"
+            className="flex-1 rounded-full border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary disabled:opacity-60"
           />
           <button
             type="button"
             onClick={handleSend}
+            disabled={sending}
             aria-label="Enviar consulta"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary-deep"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary-deep disabled:opacity-60"
           >
             <Send className="h-4 w-4" />
           </button>
