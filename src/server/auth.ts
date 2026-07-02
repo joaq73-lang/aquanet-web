@@ -64,45 +64,40 @@ export async function login(
   email: string,
   password: string,
 ): Promise<{ user: AuthUser; token: string } | null> {
-  try {
-    const result = await query(
-      `SELECT u.*, c.tipo_cliente
-       FROM usuario_sistema u
-       LEFT JOIN cliente c ON u.codigo_cliente = c.codigo_cliente
-       WHERE u.email = $1 AND u.activo = TRUE`,
-      [email],
-    );
+  const result = await query(
+    `SELECT u.*, c.tipo_cliente
+     FROM usuario_sistema u
+     LEFT JOIN cliente c ON u.codigo_cliente = c.codigo_cliente
+     WHERE u.email = $1 AND u.activo = TRUE`,
+    [email],
+  );
 
-    if (result.rows.length === 0) {
-      return null;
-    }
-
-    const user = result.rows[0];
-    const isValid = await verifyPassword(password, user.password_hash);
-
-    if (!isValid) {
-      return null;
-    }
-
-    // Actualizar último login
-    await query(`UPDATE usuario_sistema SET fecha_ultimo_login = NOW() WHERE codigo_usuario = $1`, [
-      user.codigo_usuario,
-    ]);
-
-    const authUser: AuthUser = {
-      codigo_usuario: user.codigo_usuario,
-      codigo_cliente: user.codigo_cliente,
-      email: user.email,
-      nombre_completo: user.nombre_completo,
-    };
-
-    const token = generateToken(authUser);
-
-    return { user: authUser, token };
-  } catch (error) {
-    console.error("Error en login:", error);
+  if (result.rows.length === 0) {
     return null;
   }
+
+  const user = result.rows[0];
+  const isValid = await verifyPassword(password, user.password_hash);
+
+  if (!isValid) {
+    return null;
+  }
+
+  // Actualizar último login
+  await query(`UPDATE usuario_sistema SET fecha_ultimo_login = NOW() WHERE codigo_usuario = $1`, [
+    user.codigo_usuario,
+  ]);
+
+  const authUser: AuthUser = {
+    codigo_usuario: user.codigo_usuario,
+    codigo_cliente: user.codigo_cliente,
+    email: user.email,
+    nombre_completo: user.nombre_completo,
+  };
+
+  const token = generateToken(authUser);
+
+  return { user: authUser, token };
 }
 
 export async function registerCliente(data: {
@@ -117,7 +112,7 @@ export async function registerCliente(data: {
   telefono?: string;
   correo: string;
   password: string;
-}): Promise<{ user: AuthUser; token: string } | null> {
+}): Promise<{ user: AuthUser; token: string }> {
   const client = await getClient();
 
   try {
@@ -183,8 +178,7 @@ export async function registerCliente(data: {
     return { user: authUser, token };
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Error en registro:", error);
-    return null;
+    throw error;
   } finally {
     client.release();
   }

@@ -49,10 +49,6 @@ export const Route = createFileRoute("/api/auth/register")({
           password,
         });
 
-        if (!result) {
-          throw new HttpError(500, "Error al registrar el cliente");
-        }
-
         return {
           success: true,
           token: result.token,
