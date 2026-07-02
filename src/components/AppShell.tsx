@@ -2,7 +2,6 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import sedapalLogo from "../assets/sedapal-logo-new.png";
 import {
   Bell,
-  HelpCircle,
   Home,
   CreditCard,
   AlertTriangle,
@@ -58,9 +57,6 @@ export default function AppShell({ children, rightPanel, onLogout }: AppShellPro
             <span className="absolute -top-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full bg-warning text-[11px] font-bold text-foreground ring-2 ring-[#044c9b]">
               2
             </span>
-          </button>
-          <button className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium opacity-90 hover:opacity-100">
-            <HelpCircle className="h-4 w-4" /> Ayuda
           </button>
           <div className="flex items-center gap-2 pl-2 sm:pl-3 sm:border-l border-white/20">
             <div className="grid h-9 w-9 place-items-center rounded-full bg-white text-primary-deep font-bold text-sm">

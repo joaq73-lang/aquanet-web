@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useCallback, useRef } from "react";
-import { ArrowLeft, Send, UploadCloud, CalendarDays } from "lucide-react";
+import { ArrowLeft, Send, UploadCloud, CalendarDays, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,50 +25,21 @@ export const Route = createFileRoute("/reclamo")({
 });
 
 const tiposReclamo = [
-  { value: "facturacion", label: "Facturación" },
-  { value: "calidad", label: "Calidad del servicio" },
-  { value: "presion", label: "Presión del agua" },
-  { value: "corte", label: "Corte del servicio" },
-  { value: "infraestructura", label: "Infraestructura" },
-];
-
-const subtipos: Record<string, { value: string; label: string }[]> = {
-  facturacion: [
-    { value: "monto", label: "Monto elevado" },
-    { value: "recibo", label: "No llegó recibo" },
-    { value: "cobro", label: "Cobro indebido" },
-    { value: "lectura", label: "Error de lectura" },
-  ],
-  calidad: [
-    { value: "olor", label: "Mal olor" },
-    { value: "color", label: "Agua turbia / con color" },
-    { value: "sabor", label: "Sabor extraño" },
-  ],
-  presion: [
-    { value: "baja", label: "Baja presión" },
-    { value: "sin", label: "Sin agua" },
-    { value: "intermitente", label: "Servicio intermitente" },
-  ],
-  corte: [
-    { value: "programado", label: "Corte programado no anunciado" },
-    { value: "restablecimiento", label: "Demora en restablecimiento" },
-    { value: "deuda", label: "Deuda ya cancelada" },
-  ],
-  infraestructura: [
-    { value: "fuga", label: "Fuga en la red" },
-    { value: "alcantarillado", label: "Problema de alcantarillado" },
-    { value: "medidor", label: "Medidor dañado" },
-    { value: "conexion", label: "Problema de conexión" },
-  ],
-};
+  { value: "facturacion", label: "Facturación", tipoReclamoDb: "factura_error" },
+  { value: "calidad", label: "Calidad del servicio", tipoReclamoDb: "calidad_agua" },
+  { value: "presion", label: "Presión del agua", tipoReclamoDb: "servicio_deficiente" },
+  { value: "corte", label: "Corte del servicio", tipoReclamoDb: "servicio_deficiente" },
+  { value: "infraestructura", label: "Infraestructura", tipoReclamoDb: "otro" },
+] as const;
 
 function RegistrarReclamoPage() {
+  const navigate = useNavigate();
   const [tipo, setTipo] = useState("");
-  const [subtipo, setSubtipo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -85,6 +56,43 @@ function RegistrarReclamoPage() {
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+  };
+
+  const handleSubmit = async () => {
+    if (!tipo || !descripcion.trim() || !fecha) return;
+
+    const tipoSeleccionado = tiposReclamo.find((t) => t.value === tipo);
+    if (!tipoSeleccionado) return;
+
+    setSubmitting(true);
+    try {
+      const token = window.localStorage.getItem("aquanet-token");
+      const response = await fetch("/api/reclamos/registrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tipo_reclamo: tipoSeleccionado.tipoReclamoDb,
+          descripcion,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(`Error: ${error.statusMessage || "No se pudo registrar el reclamo"}`);
+        return;
+      }
+
+      alert("Tu reclamo fue registrado correctamente.");
+      navigate({ to: "/" });
+    } catch (error) {
+      console.error("Error registrando reclamo:", error);
+      alert("Error de conexión. Por favor, intenta de nuevo.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -146,18 +154,12 @@ function RegistrarReclamoPage() {
           >
             <h3 className="text-[#044c9b] font-semibold text-sm mb-4">2. Datos del reclamo</h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+            <div className="grid grid-cols-1 gap-5 mb-5">
               <div className="space-y-1.5">
                 <Label>
                   Tipo de reclamo <span className="text-destructive">*</span>
                 </Label>
-                <Select
-                  value={tipo}
-                  onValueChange={(v) => {
-                    setTipo(v);
-                    setSubtipo("");
-                  }}
-                >
+                <Select value={tipo} onValueChange={setTipo}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Seleccione una opción" />
                   </SelectTrigger>
@@ -165,24 +167,6 @@ function RegistrarReclamoPage() {
                     {tiposReclamo.map((t) => (
                       <SelectItem key={t.value} value={t.value}>
                         {t.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>
-                  Subtipo de reclamo <span className="text-destructive">*</span>
-                </Label>
-                <Select value={subtipo} onValueChange={setSubtipo} disabled={!tipo}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Seleccione una opción" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(subtipos[tipo] || []).map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -288,8 +272,17 @@ function RegistrarReclamoPage() {
                   Cancelar
                 </Button>
               </Link>
-              <Button className="min-w-[160px] gap-2 bg-[#044c9b] hover:bg-[#033a7a] text-white">
-                <Send className="h-4 w-4" />
+              <Button
+                type="button"
+                disabled={!tipo || !descripcion.trim() || !fecha || submitting}
+                onClick={handleSubmit}
+                className="min-w-[160px] gap-2 bg-[#044c9b] hover:bg-[#033a7a] text-white"
+              >
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
                 Enviar Reclamo
               </Button>
             </div>

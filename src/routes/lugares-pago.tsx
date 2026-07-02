@@ -121,9 +121,13 @@ function LugaresPagoPage() {
     <AppShell>
       <div className="p-4 sm:p-8">
         <div className="mb-8">
-          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary-deep">Ubicaciones</p>
+          <p className="text-sm font-medium uppercase tracking-[0.25em] text-primary-deep">
+            Ubicaciones
+          </p>
           <h1 className="mt-3 text-3xl font-semibold text-foreground">Lugares de pago</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Encuentra los puntos de pago más cercanos a tu zona</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Encuentra los puntos de pago más cercanos a tu zona
+          </p>
         </div>
 
         {searchState === "search" && (
@@ -133,7 +137,9 @@ function LugaresPagoPage() {
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">Región / Provincia</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    Región / Provincia
+                  </label>
                   <select
                     value={region}
                     onChange={(e) => setRegion(e.target.value)}
@@ -147,7 +153,9 @@ function LugaresPagoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">Tipo de canal</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    Tipo de canal
+                  </label>
                   <select
                     value={tipo}
                     onChange={(e) => setTipo(e.target.value)}
@@ -173,14 +181,18 @@ function LugaresPagoPage() {
 
             {/* Escenarios de prueba */}
             <div className="rounded-2xl border border-border bg-card p-4">
-              <p className="text-xs font-semibold text-muted-foreground mb-3">ESCENARIOS DE PRUEBA:</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-3">
+                ESCENARIOS DE PRUEBA:
+              </p>
               <div className="flex flex-wrap gap-2">
                 {(["with", "empty"] as Scenario[]).map((s) => (
                   <button
                     key={s}
                     onClick={() => setScenario(s)}
                     className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
-                      scenario === s ? "bg-primary text-primary-foreground" : "border border-border bg-background hover:bg-secondary"
+                      scenario === s
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border bg-background hover:bg-secondary"
                     }`}
                   >
                     {s === "with" ? "✓ Con resultados" : "✗ Sin resultados"}
@@ -243,11 +255,29 @@ function LugaresPagoPage() {
                         <p className="font-semibold text-foreground">{punto.nombre}</p>
                         <p className="text-xs text-muted-foreground mt-1">{punto.tipo}</p>
                       </div>
-                      {expandedId === punto.id ? (
-                        <ChevronUp className="h-5 w-5 text-primary shrink-0" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
-                      )}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            window.open(
+                              `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(punto.direccion)}`,
+                              "_blank",
+                              "noopener,noreferrer",
+                            );
+                          }}
+                          aria-label={`Ver mapa de ${punto.nombre}`}
+                          title="Ver en el mapa"
+                          className="grid h-9 w-9 place-items-center rounded-full text-primary-deep hover:bg-primary-soft transition"
+                        >
+                          <MapPin className="h-4 w-4" />
+                        </button>
+                        {expandedId === punto.id ? (
+                          <ChevronUp className="h-5 w-5 text-primary" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </div>
                     </div>
 
                     {expandedId === punto.id && (
@@ -273,7 +303,9 @@ function LugaresPagoPage() {
                             <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">
                               Disponible
                             </p>
-                            <p className="mt-1 text-sm font-semibold text-foreground">{punto.dias}</p>
+                            <p className="mt-1 text-sm font-semibold text-foreground">
+                              {punto.dias}
+                            </p>
                           </div>
                         </div>
                       </div>
