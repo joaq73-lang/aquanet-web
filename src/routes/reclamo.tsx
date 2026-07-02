@@ -82,6 +82,8 @@ function RegistrarReclamoPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [reclamoRegistrado, setReclamoRegistrado] = useState<ReclamoRegistrado | null>(null);
+  const [aceptaDeclaracion, setAceptaDeclaracion] = useState(false);
+  const [aceptaPromociones, setAceptaPromociones] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -101,7 +103,7 @@ function RegistrarReclamoPage() {
   };
 
   const handleSubmit = async () => {
-    if (!tipo || !descripcion.trim() || !fecha) return;
+    if (!tipo || !descripcion.trim() || !fecha || !aceptaDeclaracion) return;
 
     const tipoSeleccionado = tiposReclamo.find((t) => t.value === tipo);
     if (!tipoSeleccionado) return;
@@ -401,6 +403,42 @@ function RegistrarReclamoPage() {
             </div>
           </section>
 
+          {/* Sección 3: Declaración jurada y consentimientos */}
+          <section
+            className="rounded-2xl bg-card border border-border p-5 sm:p-6"
+            style={{ boxShadow: "var(--shadow-card)" }}
+          >
+            <label className="flex items-start gap-3 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={aceptaDeclaracion}
+                onChange={(e) => setAceptaDeclaracion(e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary"
+              />
+              <span>
+                La información que he registrado, tiene carácter de Declaración Jurada, al amparo de
+                lo dispuesto en la Ley Nº 27444, Ley de Procedimiento Administrativo General,
+                sometiéndome a la verificación y/o fiscalización posterior que la autoridad
+                administrativa tenga a bien efectuar, y en caso de incurrir en falsedad, a las
+                sanciones administrativas, civiles o penales, correspondientes, conforme a lo
+                dispuesto en los artículos 411, 427 y 438 del Código Penal, en concordancia con el
+                artículo IV numerales 1.7 y 1.16 del Título Preliminar y el artículo 34 del Texto
+                Único Ordenado de la Ley N° 27444, Ley del Procedimiento Administrativo General,
+                aprobado por Decreto Supremo N° 004-2019-JUS.{" "}
+                <span className="text-destructive">(*)</span>
+              </span>
+            </label>
+            <label className="mt-4 flex items-start gap-3 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={aceptaPromociones}
+                onChange={(e) => setAceptaPromociones(e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 rounded border-border text-primary"
+              />
+              <span>Autorizo el uso de mis datos para Promociones.</span>
+            </label>
+          </section>
+
           {/* Footer actions */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
             <p className="text-xs text-muted-foreground">
@@ -414,7 +452,9 @@ function RegistrarReclamoPage() {
               </Link>
               <Button
                 type="button"
-                disabled={!tipo || !descripcion.trim() || !fecha || submitting}
+                disabled={
+                  !tipo || !descripcion.trim() || !fecha || !aceptaDeclaracion || submitting
+                }
                 onClick={handleSubmit}
                 className="min-w-[160px] gap-2 bg-[#044c9b] hover:bg-[#033a7a] text-white"
               >
