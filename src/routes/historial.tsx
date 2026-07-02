@@ -65,6 +65,62 @@ function getEstadoFacturaColor(estado: string): string {
   return ESTADO_FACTURA_COLORS[estado] ?? "bg-gray-100 text-gray-700";
 }
 
+// Las fechas llegan del backend como "YYYY-MM-DD" (o "YYYY-MM-DD - YYYY-MM-DD"
+// para el periodo); se muestran en formato DD/MM/AAAA sin pasar por Date, para
+// no arrastrar zona horaria ni el feo Date.toString() por defecto de JS.
+function formatFechaBonita(isoDate: string): string {
+  const [year, month, day] = isoDate.split("-");
+  if (!year || !month || !day) return isoDate;
+  return `${day}/${month}/${year}`;
+}
+
+function formatPeriodoBonito(periodo: string): string {
+  return periodo
+    .split(" - ")
+    .map((fecha) => formatFechaBonita(fecha.trim()))
+    .join(" - ");
+}
+
+function generarReciboHtml(factura: Factura): string {
+  const filas = [
+    { label: "Agua potable", monto: factura.detalles.concepto_consumo },
+    { label: "Alcantarillado", monto: factura.detalles.concepto_alcantarillado },
+    { label: "Cargo fijo", monto: factura.detalles.concepto_cargo_fijo },
+    { label: "IGV", monto: factura.detalles.concepto_igv },
+    { label: "Mora", monto: factura.detalles.concepto_mora },
+  ]
+    .map(
+      (item) =>
+        `<tr><td style="padding:6px 0;">${item.label}</td><td style="padding:6px 0;text-align:right;">S/. ${item.monto.toFixed(2)}</td></tr>`,
+    )
+    .join("");
+
+  return `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Recibo N° ${factura.codigo_factura} — AQUANET</title>
+    <style>
+      body { font-family: system-ui, -apple-system, sans-serif; color: #111; max-width: 480px; margin: 2rem auto; padding: 0 1rem; }
+      h1 { font-size: 1.25rem; color: #044c9b; }
+      .row { display: flex; justify-content: space-between; margin: 0.35rem 0; font-size: 0.9rem; }
+      table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+      .total { font-weight: 700; border-top: 1px solid #ccc; padding-top: 0.5rem; margin-top: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <h1>AQUANET — Recibo N° ${factura.codigo_factura}</h1>
+    <div class="row"><span>Periodo:</span><span>${formatPeriodoBonito(factura.periodo)}</span></div>
+    <div class="row"><span>Emisión:</span><span>${formatFechaBonita(factura.emision)}</span></div>
+    <div class="row"><span>Vencimiento:</span><span>${formatFechaBonita(factura.vencimiento)}</span></div>
+    <div class="row"><span>Consumo:</span><span>${factura.detalles.consumo} m³</span></div>
+    <div class="row"><span>Estado:</span><span>${formatEstadoFactura(factura.estado)}</span></div>
+    <table>${filas}</table>
+    <div class="row total"><span>Monto Total</span><span>S/. ${factura.monto_total.toFixed(2)}</span></div>
+  </body>
+</html>`;
+}
+
 function HistorialPage() {
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,8 +165,17 @@ function HistorialPage() {
     });
   }, [facturas, startDate, endDate]);
 
-  const handleDescargar = (numero: string) => {
-    alert(`Descargando recibo ${numero}...`);
+  const handleDescargar = (factura: Factura) => {
+    const html = generarReciboHtml(factura);
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `recibo-aquanet-${factura.codigo_factura}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (loading) {
@@ -200,9 +265,15 @@ function HistorialPage() {
                       setOpenDrawer(true);
                     }}
                   >
-                    <td className="px-6 py-4 font-medium text-foreground">{factura.periodo}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{factura.emision}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{factura.vencimiento}</td>
+                    <td className="px-6 py-4 font-medium text-foreground">
+                      {formatPeriodoBonito(factura.periodo)}
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground">
+                      {formatFechaBonita(factura.emision)}
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground">
+                      {formatFechaBonita(factura.vencimiento)}
+                    </td>
                     <td className="px-6 py-4 text-right font-semibold">
                       {factura.monto_total.toFixed(2)}
                     </td>
@@ -225,7 +296,9 @@ function HistorialPage() {
             <DrawerContent className="bg-background">
               <DrawerHeader>
                 <DrawerTitle>Detalles del Recibo</DrawerTitle>
-                <DrawerDescription>Periodo: {selectedFactura.periodo}</DrawerDescription>
+                <DrawerDescription>
+                  Periodo: {formatPeriodoBonito(selectedFactura.periodo)}
+                </DrawerDescription>
               </DrawerHeader>
 
               <div className="space-y-4 p-4">
@@ -263,11 +336,11 @@ function HistorialPage() {
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleDescargar(selectedFactura.codigo_factura.toString())}
+                    onClick={() => handleDescargar(selectedFactura)}
                     className="flex-1 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
                   >
                     <Download className="h-4 w-4" />
-                    Descargar PDF
+                    Descargar recibo
                   </button>
                   <DrawerClose className="flex-1 rounded-lg border border-border px-4 py-2 text-foreground hover:bg-muted">
                     Cerrar

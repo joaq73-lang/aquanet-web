@@ -49,6 +49,39 @@ type MedioPago = {
   nombre_medio_pago: string;
 };
 
+function descargarConstancia(datos: { operationNumber: string; monto: number; medioPago: string }) {
+  const html = `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Constancia de pago — AQUANET</title>
+    <style>
+      body { font-family: system-ui, -apple-system, sans-serif; color: #111; max-width: 480px; margin: 2rem auto; padding: 0 1rem; }
+      h1 { font-size: 1.25rem; color: #044c9b; }
+      .row { display: flex; justify-content: space-between; margin: 0.5rem 0; font-size: 0.9rem; }
+      .total { font-weight: 700; border-top: 1px solid #ccc; padding-top: 0.5rem; margin-top: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <h1>AQUANET — Constancia de pago</h1>
+    <div class="row"><span>Número de operación:</span><span>${datos.operationNumber}</span></div>
+    <div class="row"><span>Fecha:</span><span>${new Date().toLocaleDateString("es-PE")}</span></div>
+    <div class="row"><span>Medio de pago:</span><span>${datos.medioPago}</span></div>
+    <div class="row total"><span>Monto pagado</span><span>S/. ${datos.monto.toFixed(2)}</span></div>
+  </body>
+</html>`;
+
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `constancia-pago-${datos.operationNumber}.html`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function RealizarPagoPage() {
   const [step, setStep] = useState<PaymentStep>("select");
   const [result, setResult] = useState<PaymentResult>("approved");
@@ -442,7 +475,16 @@ function RealizarPagoPage() {
 
               <div className="flex gap-3 justify-center pt-4">
                 <button
-                  onClick={() => alert("Descargando constancia...")}
+                  onClick={() =>
+                    descargarConstancia({
+                      operationNumber,
+                      monto: totalAmount,
+                      medioPago:
+                        medioPagoTipo === "tarjeta"
+                          ? "Tarjeta de crédito / débito"
+                          : "Billetera electrónica",
+                    })
+                  }
                   className="rounded-full border border-border bg-background px-6 py-3 font-semibold text-foreground hover:bg-secondary transition flex items-center gap-2"
                 >
                   <Download className="h-4 w-4" /> Descargar Constancia

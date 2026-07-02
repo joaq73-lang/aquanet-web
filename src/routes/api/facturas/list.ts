@@ -17,7 +17,11 @@ export const Route = createFileRoute("/api/facturas/list")({
         const estado = url.searchParams.get("estado");
 
         let sql = `
-          SELECT f.*, s.codigo_cliente
+          SELECT f.*, s.codigo_cliente,
+                 to_char(f.fecha_inicio_consumo, 'YYYY-MM-DD') AS fecha_inicio_consumo_iso,
+                 to_char(f.fecha_fin_consumo, 'YYYY-MM-DD') AS fecha_fin_consumo_iso,
+                 to_char(f.fecha_emision_factura, 'YYYY-MM-DD') AS fecha_emision_factura_iso,
+                 to_char(f.fecha_vencimiento_factura, 'YYYY-MM-DD') AS fecha_vencimiento_factura_iso
           FROM factura f
           JOIN suministro s ON f.codigo_suministro = s.codigo_suministro
           WHERE s.codigo_cliente = $1
@@ -40,9 +44,9 @@ export const Route = createFileRoute("/api/facturas/list")({
         return {
           facturas: result.rows.map((row: any) => ({
             codigo_factura: row.codigo_factura,
-            periodo: `${row.fecha_inicio_consumo} - ${row.fecha_fin_consumo}`,
-            emision: row.fecha_emision_factura,
-            vencimiento: row.fecha_vencimiento_factura,
+            periodo: `${row.fecha_inicio_consumo_iso} - ${row.fecha_fin_consumo_iso}`,
+            emision: row.fecha_emision_factura_iso,
+            vencimiento: row.fecha_vencimiento_factura_iso,
             monto_total: parseFloat(row.monto_total),
             monto_pagado: parseFloat(row.monto_pagado),
             saldo: parseFloat(row.monto_total) - parseFloat(row.monto_pagado),
